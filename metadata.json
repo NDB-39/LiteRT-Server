@@ -1,0 +1,6 @@
+{
+  "name": "LiteRT Server",
+  "description": "Android application running local HTTP API compatible with OpenAI Chat Completions using LiteRT-LM SDK.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
