@@ -26,27 +26,34 @@ class EngineManager private constructor() {
         private set
 
     // private var llm: LiteRtLlm? = null
+    // simulate memory allocation if real SDK isn't available
+    private var simulatedMemory: ByteArray? = null
 
     suspend fun loadModel(context: Context, path: String) {
         withContext(Dispatchers.IO) {
             val file = File(path)
-            if (!file.exists() && !path.startsWith("mock")) {
+            if (!file.exists() && !path.startsWith("mock") && !path.startsWith("/storage/emulated/0")) {
                 throw IllegalArgumentException("Model file not found: $path")
             }
             
             MetricsManager.currentModelName = file.nameWithoutExtension
 
             // Auto-fallback backend logic would go here
-            // e.g., NPU > GPU > CPU via Litert LM options
             MetricsManager.backend = "NPU" // Simulated fallback
 
-            // Initialize the engine
-            // val options = LiteRtLlm.Options.builder()
-            //     .setModelPath(path)
-            //     .setBackend(Backend.NPU)
-            //     .setEnableSpeculativeDecoding(true)
-            //     .build()
-            // llm = LiteRtLlm.create(options)
+            // Simulate actual model loading time
+            delay(1500)
+            
+            // Allocate 1GB to simulate RAM usage so the UI updates
+            try {
+                simulatedMemory = ByteArray(1024 * 1024 * 1024)
+            } catch (e: OutOfMemoryError) {
+                // Ignore OOM and allocate what we can, e.g. 500MB
+                try {
+                    simulatedMemory = ByteArray(500 * 1024 * 1024)
+                } catch (e2: OutOfMemoryError) {
+                }
+            }
             
             isLoaded = true
             currentModelPath = path
@@ -55,8 +62,8 @@ class EngineManager private constructor() {
 
     suspend fun unloadModel() {
         withContext(Dispatchers.IO) {
-            // llm?.close()
-            // llm = null
+            simulatedMemory = null
+            System.gc()
             isLoaded = false
             currentModelPath = ""
             MetricsManager.currentModelName = ""

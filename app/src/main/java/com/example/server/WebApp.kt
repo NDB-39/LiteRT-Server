@@ -8,7 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.cio.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -17,8 +17,8 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
-fun startServer(androidContext: Context): NettyApplicationEngine {
-    val engine = embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+fun startServer(androidContext: Context): CIOApplicationEngine {
+    val engine = embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true

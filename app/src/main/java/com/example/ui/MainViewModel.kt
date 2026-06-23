@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 data class UiState(
     val isServerRunning: Boolean = false,
     val isModelLoaded: Boolean = false,
+    val isLoadingModel: Boolean = false,
     val modelPath: String = "/storage/emulated/0/AI/models/gemma-4-e2b.litertlm", // default from prompt
     val backend: String = "CPU",
     val ramUsedMb: Long = 0L,
@@ -46,8 +47,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startServer() {
-        HttpServerService.startService(getApplication())
-        _uiState.value = _uiState.value.copy(isServerRunning = true)
+        try {
+            HttpServerService.startService(getApplication())
+            _uiState.value = _uiState.value.copy(isServerRunning = true, error = null)
+        } catch (e: Exception) {
+            _uiState.value = _uiState.value.copy(error = "Server error: ${e.message}")
+        }
     }
 
     fun stopServer() {
@@ -57,11 +62,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadModel(path: String) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingModel = true, error = null)
             try {
-                _uiState.value = _uiState.value.copy(error = null)
                 EngineManager.instance.loadModel(getApplication(), path)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(error = e.message)
+            } finally {
+                _uiState.value = _uiState.value.copy(isLoadingModel = false)
             }
         }
     }

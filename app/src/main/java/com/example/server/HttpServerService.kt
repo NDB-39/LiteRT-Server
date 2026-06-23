@@ -10,10 +10,11 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import io.ktor.server.netty.NettyApplicationEngine
+import io.ktor.server.cio.CIOApplicationEngine
+import android.content.pm.ServiceInfo
 
 class HttpServerService : Service() {
-    private var serverEngine: NettyApplicationEngine? = null
+    private var serverEngine: CIOApplicationEngine? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
     companion object {
@@ -61,7 +62,11 @@ class HttpServerService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
             
-        startForeground(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
 
         // Acquire WakeLock
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -79,7 +84,12 @@ class HttpServerService : Service() {
                 it.release()
             }
         }
-        stopForeground(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
         stopSelf()
     }
     

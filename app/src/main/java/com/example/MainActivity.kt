@@ -70,9 +70,12 @@ fun ServerAppLayout(viewModel: MainViewModel, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { viewModel.loadModel(pathInput) }) {
-                Text("Load Model")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Button(onClick = { viewModel.loadModel(pathInput) }, enabled = !uiState.isLoadingModel) {
+                Text(if (uiState.isLoadingModel) "Loading..." else "Load Model")
+            }
+            if (uiState.isLoadingModel) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
             }
         }
 
